@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Mysql | ExampleSite</title>
+<meta name="keywords" content="">
+<meta name="description" content="索引 1. 索引 在数据库中索引最核心的作用是：加速查找。 例如：在含有300w条数据的表中查询，无索引需要700秒，而利用索引可能仅需1秒。
+mysql&gt; select * from big where password=&#34;81f98021-6927-433a-8f0d-0f5ac274f96e&#34;; &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | id | name | email | password | age | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; 1 row in set (0.70 sec) mysql&gt; select * from big where id=11; &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | id | name | email | password | age | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; 1 row in set (0.">
+<meta name="author" content="Me">
+<link rel="canonical" href="https://zhougongjin555.github.io/mysql/">
+<meta name="google-site-verification" content="XYZabc">
+<meta name="yandex-verification" content="XYZabc">
+<meta name="msvalidate.01" content="XYZabc">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.3299c596a7007118365635c056dd427dace22b7b8c1341fdef6fa6c31359ba10.css" integrity="sha256-MpnFlqcAcRg2VjXAVt1CfaziK3uME0H972&#43;mwxNZuhA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.acb54fd32bbc1982428b8850317e45d076b95012730a5936667e6bc21777692a.js" integrity="sha256-rLVP0yu8GYJCi4hQMX5F0Ha5UBJzClk2Zn5rwhd3aSo="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://zhougongjin555.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="16x16" href="https://zhougongjin555.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="https://zhougongjin555.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="apple-touch-icon" href="https://zhougongjin555.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="https://zhougongjin555.github.io/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Mysql" />
+<meta property="og:description" content="索引 1. 索引 在数据库中索引最核心的作用是：加速查找。 例如：在含有300w条数据的表中查询，无索引需要700秒，而利用索引可能仅需1秒。
+mysql&gt; select * from big where password=&#34;81f98021-6927-433a-8f0d-0f5ac274f96e&#34;; &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | id | name | email | password | age | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; 1 row in set (0.70 sec) mysql&gt; select * from big where id=11; &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | id | name | email | password | age | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; 1 row in set (0." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zhougongjin555.github.io/mysql/" /><meta property="og:image" content="https://zhougongjin555.github.io/papermod-cover.png"/><meta property="article:section" content="" />
+<meta property="article:published_time" content="2022-11-26T21:26:37+08:00" />
+<meta property="article:modified_time" content="2022-11-26T21:26:37+08:00" /><meta property="og:site_name" content="ExampleSite" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://zhougongjin555.github.io/papermod-cover.png"/>
+
+<meta name="twitter:title" content="Mysql"/>
+<meta name="twitter:description" content="索引 1. 索引 在数据库中索引最核心的作用是：加速查找。 例如：在含有300w条数据的表中查询，无索引需要700秒，而利用索引可能仅需1秒。
+mysql&gt; select * from big where password=&#34;81f98021-6927-433a-8f0d-0f5ac274f96e&#34;; &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | id | name | email | password | age | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; 1 row in set (0.70 sec) mysql&gt; select * from big where id=11; &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | id | name | email | password | age | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | &#43;----&#43;---------&#43;---------------&#43;--------------------------------------&#43;------&#43; 1 row in set (0."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Mysql",
+      "item": "https://zhougongjin555.github.io/mysql/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Mysql",
+  "name": "Mysql",
+  "description": "索引 1. 索引 在数据库中索引最核心的作用是：加速查找。 例如：在含有300w条数据的表中查询，无索引需要700秒，而利用索引可能仅需1秒。\nmysql\u0026gt; select * from big where password=\u0026#34;81f98021-6927-433a-8f0d-0f5ac274f96e\u0026#34;; +----+---------+---------------+--------------------------------------+------+ | id | name | email | password | age | +----+---------+---------------+--------------------------------------+------+ | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | +----+---------+---------------+--------------------------------------+------+ 1 row in set (0.70 sec) mysql\u0026gt; select * from big where id=11; +----+---------+---------------+--------------------------------------+------+ | id | name | email | password | age | +----+---------+---------------+--------------------------------------+------+ | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | +----+---------+---------------+--------------------------------------+------+ 1 row in set (0.",
+  "keywords": [
+    
+  ],
+  "articleBody": "索引 1. 索引 在数据库中索引最核心的作用是：加速查找。 例如：在含有300w条数据的表中查询，无索引需要700秒，而利用索引可能仅需1秒。\nmysql\u003e select * from big where password=\"81f98021-6927-433a-8f0d-0f5ac274f96e\"; +----+---------+---------------+--------------------------------------+------+ | id | name | email | password | age | +----+---------+---------------+--------------------------------------+------+ | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | +----+---------+---------------+--------------------------------------+------+ 1 row in set (0.70 sec) mysql\u003e select * from big where id=11; +----+---------+---------------+--------------------------------------+------+ | id | name | email | password | age | +----+---------+---------------+--------------------------------------+------+ | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | +----+---------+---------------+--------------------------------------+------+ 1 row in set (0.00 sec) mysql\u003e select * from big where name=\"wu-13-1\"; +----+---------+---------------+--------------------------------------+------+ | id | name | email | password | age | +----+---------+---------------+--------------------------------------+------+ | 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e | 9 | +----+---------+---------------+--------------------------------------+------+ 1 row in set (0.00 sec) 在开发过程中会为哪些 经常会被搜索的列 创建索引，以提高程序的响应速度。例如：查询手机号、邮箱、用户名等。\n1.1 索引原理 为什么加上索引之后速度能有这么大的提升呢？ 因为索引的底层是基于B+Tree的数据结构存储的。\n![image-20210526160040895](assets/image-20210526160040895.png\n很明显，如果有了索引结构的查询效率比表中逐行查询的速度要快很多且数据量越大越明显。\nB+Tree结构连接：https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html\n数据库的索引是基于上述B+Tree的数据结构实现，但在创建数据库表时，如果指定不同的引擎，底层使用的B+Tree结构的原理有些不同。\nmyisam引擎，非聚簇索引（数据 和 索引结构 分开存储）\ninnodb引擎，聚簇索引（数据 和 主键索引结构存储在一起）\n1.1.1 非聚簇索引（mysiam引擎） create table 表名( id int not null auto_increment primary key, name varchar(32) not null, age int )engine=myisam default charset=utf8; 1.1.2 聚簇索引（innodb引擎） create table 表名( id int not null auto_increment primary key, name varchar(32) not null, age int )engine=innodb default charset=utf8; ![image-20210526160040895](assets/image-20210526160040895.png\n在MySQL文件存储中的体现：\nroot@192 userdb # pwd /usr/local/mysql/data/userdb root@192 userdb # ls -l total 1412928 -rw-r----- 1 _mysql _mysql 8684 May 15 22:51 big.frm，表结构。 -rw-r----- 1 _mysql _mysql 717225984 May 15 22:51 big.ibd，数据和索引结构。 -rw-r----- 1 _mysql _mysql 8588 May 16 11:38 goods.frm -rw-r----- 1 _mysql _mysql 98304 May 16 11:39 goods.ibd -rw-r----- 1 _mysql _mysql 8586 May 26 10:57 t2.frm，表结构 -rw-r----- 1 _mysql _mysql 0 May 26 10:57 t2.MYD，数据 -rw-r----- 1 _mysql _mysql 1024 May 26 10:57 t2.MYI，索引结构 上述 聚簇索引 和 非聚簇索引 底层均利用了B+Tree结构结构，只不过内部数据存储有些不同罢了。\n在企业开发中一般都会使用 innodb 引擎（内部支持事务、行级锁、外键等特点），在MySQL5.5版本之后默认引擎也是innodb。\n区别\ninnodb支持事务、行锁、外键，安全性较高， mysiam插入和查询更快以及删除相较都更快，比如查询会直接查找对应行号，而innodb需要一行一行遍历，删除，mysiam会直接重新建表，而mysiam会一行一行s mysql\u003e show create table users \\G; *************************** 1. row *************************** Table: users Create Table: CREATE TABLE `users` ( `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(32) DEFAULT NULL, `password` varchar(64) DEFAULT NULL, `ctime` datetime DEFAULT NULL, `age` int(11) DEFAULT '5', PRIMARY KEY (`id`) ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8 1 row in set (0.00 sec) ERROR: No query specified mysql\u003e show index from users \\G; *************************** 1. row *************************** Table: users Non_unique: 0 Key_name: PRIMARY Seq_in_index: 1 Column_name: id Collation: A Cardinality: 3 Sub_part: NULL Packed: NULL Null: Index_type: BTREE -- 虽然显示BTree，但底层数据结构基于B+Tree。 Comment: Index_comment: 1 row in set (0.00 sec) ERROR: No query specified mysql\u003e innodb引擎，一般创建的索引：聚簇索引。\n1.2 常见索引 在innodb引擎下，索引底层都是基于B+Tree数据结构存储（聚簇索引）。\n在开发过程中常见的索引类型有：\n主键索引：加速查找、不能为空、不能重复。 + 联合主键索引 唯一索引：加速查找、不能重复。 + 联合唯一索引 (可以有一个空值) 普通索引：加速查找。 + 联合索引 1.2.1 主键和联合主键索引 primary key : 创建主键索引 create table 表名( id int not null auto_increment primary key, -- 主键 name varchar(32) not null ); create table 表名( id int not null auto_increment, name varchar(32) not null, primary key(id) ); create table 表名( id int not null auto_increment, name varchar(32) not null, primary key(列1,列2) -- 如果有多列，称为联合主键（不常用且myisam引擎支持） ); alter table 表名 add primary key(列名); alter table 表名 drop primary key; 注意：删除索引时可能会报错，**自增列必须定义为键 **。\nERROR 1075 (42000): Incorrect table definition; there can be only one auto column and it must be defined as a key alter table 表 change id id int not null; create table t7( id int not null, name varchar(32) not null, primary key(id) ); alter table t6 drop primary key; 1.2.2 唯一和联合唯一索引 unique: 唯一索引 create table 表名( id int not null auto_increment primary key, name varchar(32) not null, email varchar(64) not null, unique ix_name (name), unique ix_email (email), ); create table 表名( id int not null auto_increment, name varchar(32) not null, unique (列1,列2) -- 如果有多列，称为联合唯一索引。 ); create unique index 索引名 on 表名(列名); alter table 表名 add uniuqe index 索引名(字段1， 字段2， 字段3); alter table 表名 drop unique index 索引名; 1.2.3 索引和联合索引 index : 普通索引 create table 表名( id int not null auto_increment primary key, name varchar(32) not null, email varchar(64) not null, index ix_email (email), index ix_name (name), ); create table 表名( id int not null auto_increment primary key, name varchar(32) not null, email varchar(64) not null, index ix_email (name,email) -- 如果有多列，称为联合索引。 ); create index 索引名 on 表名(列名); drop index 索引名 on 表名; 1.3 操作表 在表中创建索引后，查询时一定要命中索引。\n在数据库的表中创建索引之后优缺点如下：\n优点：查找速度快、约束（唯一、主键、联合唯一） 缺点：插入、删除、更新速度比较慢，因为每次操作都需要调整整个B+Tree的数据结构关系。 所以，在表中不要无节制的去创建索引啊。。。\n在开发中，我们会对表中经常被搜索的列创建索引，从而提高程序的响应速度。\nCREATE TABLE `big` ( `id` int(11) NOT NULL AUTO_INCREMENT, `name` varchar(32) DEFAULT NULL, `email` varchar(64) DEFAULT NULL, `password` varchar(64) DEFAULT NULL, `age` int(11) DEFAULT NULL, PRIMARY KEY (`id`), -- 主键索引 UNIQUE KEY `big_unique_email` (`email`), -- 唯一索引 index `ix_name_pwd` (`name`,`password`) -- 联合索引 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 一般情况下，我们针对只要通过索引列去搜搜都可以 命中 索引（通过索引结构加速查找）。\nselect * from big where id = 5; select * from big where id \u003e 5; select * from big where email = \"wupeiqi@live.com\"; select * from big where name = \"武沛齐\"; select * from big where name = \"kelly\" and password=\"ffsijfs\"; ... 但是，还是会有一些特殊的情况，让我们无法命中索引（即使创建了索引），这也是需要大家在开发中要注意的。\n类型不一致\nselect * from big where name = 123;\t-- 未命中 select * from big where email = 123;\t-- 未命中 特殊的主键： select * from big where id = \"123\";\t-- 命中 使用不等于\nselect * from big where name != \"武沛齐\";\t-- 未命中 select * from big where email != \"wupeiqi@live.com\"; -- 未命中 特殊的主键： select * from big where id != 123;\t-- 命中 or，当or条件中有未建立索引的列才失效。\nselect * from big where id = 123 or password=\"xx\";\t-- 未命中 select * from big where name = \"wupeiqi\" or password=\"xx\";\t-- 未命中 特别的： select * from big where id = 10 or password=\"xx\" and name=\"xx\"; -- 命中 排序，当根据索引排序时候，选择的映射如果不是索引，则不走索引。\nselect * from big order by name asc; -- 未命中 select * from big order by name desc; -- 未命中 select name from big order by name desc; -- 命中 特别的主键： select * from big order by id desc; -- 命中 like，模糊匹配时。\nselect * from big where name like \"%u-12-19999\";\t-- 未命中 select * from big where name like \"_u-12-19999\";\t-- 未命中 select * from big where name like \"wu-%-10\";\t-- 未命中 特别的： select * from big where name like \"wu-1111-%\";\t-- 命中 select * from big where name like \"wuw-%\";\t-- 命中, 要求通配符必须在最后面才行 使用函数\nselect * from big where reverse(name) = \"wupeiqi\"; -- 未命中 特别的： select * from big where name = reverse(\"wupeiqi\"); -- 命中 最左前缀，如果是联合索引，要遵循最左前缀原则。\n如果联合索引为：(name,password) name and password -- 命中 name -- 命中 password -- 未命中 name or password -- 未命中 常见的无法命中索引的情况就是上述的示例。\n对于大家来说会现在的最大的问题是，记不住，哪怎么办呢？接下来看执行计划。\n1.4 执行计划 MySQL中提供了执行计划，让你能够预判SQL的执行（只能给到一定的参考，不一定完全能预判准确）。\nexplain + SQL语句; 其中比较重要的是 type，他他SQL性能比较重要的标志，性能从低到高依次：all \u003c index \u003c range \u003c index_merge \u003c ref_or_null \u003c ref \u003c eq_ref \u003c system/const\nALL，全表扫描，数据表从头到尾找一遍。(一般未命中索引，都是会执行权标扫描)\nselect * from big; 特别的：如果有limit，则找到之后就不在继续向下扫描. select * from big limit 1; INDEX，全索引扫描，对索引从头到尾找一遍\nexplain select id from big; explain select name from big; RANGE，对索引列进行范围查找\nexplain select * from big where id \u003e 10; explain select * from big where id in (11,22,33); explain select * from big where id between 10 and 20; explain select * from big where name \u003e \"wupeiqi\" ; INDEX_MERGE，合并索引，使用多个单列索引搜索\nexplain select * from big where id = 10 or name=\"武沛齐\"; REF，根据 索引 直接去查找（非键）。\nselect * from big where name = '武沛齐'; EQ_REF，连表操作时常见。\nexplain select big.name,users.id from big left join users on big.age = users.id; CONST，常量，表最多有一个匹配行,因为仅有一行,在这行的列值可被优化器剩余部分认为是常数,const表很快。\nexplain select * from big where id=11;\t-- 主键 explain select * from big where email=\"w-11-0@qq.com\";\t-- 唯一索引 SYSTEM，系统，表仅有一行(=系统表)。这是const联接类型的一个特例。\nexplain select * from (select * from big where id=1 limit 1) as A; 其他列：\nid，查询顺序标识 z，查询类型 SIMPLE 简单查询 PRIMARY 最外层查询 SUBQUERY 映射为子查询 DERIVED 子查询 UNION 联合 UNION RESULT 使用联合的结果 ... table，正在访问的表名 partitions，涉及的分区（MySQL支持将数据划分到不同的idb文件中，详单与数据的拆分）。 一个特别大的文件拆分成多个小文件（分区）。 possible_keys，查询涉及到的字段上若存在索引，则该索引将被列出，即：可能使用的索引。 key，显示MySQL在查询中实际使用的索引，若没有使用索引，显示为NULL。例如：有索引但未命中，则possible_keys显示、key则显示NULL。 key_len，表示索引字段的最大可能长度。(类型字节长度 + 变长2 + 可空1)，例如：key_len=195，类型varchar(64)，195=64*3+2+1 ref，连表时显示的关联信息。例如：A和B连表，显示连表的字段信息。 rows，估计读取的数据行数（只是预估值） explain select * from big where password =\"025dfdeb-d803-425d-9834-445758885d1c\"; explain select * from big where password =\"025dfdeb-d803-425d-9834-445758885d1c\" limit 1; filtered，返回结果的行占需要读到的行的百分比。 explain select * from big where id=1; -- 100，只读了一个1行，返回结果也是1行。 explain select * from big where password=\"27d8ba90-edd0-4a2f-9aaf-99c9d607c3b3\"; -- 10，读取了10行，返回了1行。 注意：密码27d8ba90-edd0-4a2f-9aaf-99c9d607c3b3在第10行 extra，该列包含MySQL解决查询的详细信息。 “Using index” 此值表示mysql将使用覆盖索引，以避免访问表。不要把覆盖索引和index访问类型弄混了。 “Using where” 这意味着mysql服务器将在存储引擎检索行后再进行过滤，许多where条件里涉及索引中的列，当（并且如果）它读取索引时，就能被存储引擎检验，因此不是所有带where子句的查询都会显示“Using where”。有时“Using where”的出现就是一个暗示：查询可受益于不同的索引。 “Using temporary” 这意味着mysql在对查询结果排序时会使用一个临时表。 “Using filesort” 这意味着mysql会对结果使用一个外部索引排序，而不是按索引次序从表里读取行。mysql有两种文件排序算法，这两种排序方式都可以在内存或者磁盘上完成，explain不会告诉你mysql将使用哪一种文件排序，也不会告诉你排序会在内存里还是磁盘上完成。 “Range checked for each record(index map: N)” 这个意味着没有好用的索引，新的索引将在联接的每一行上重新估算，N是显示在possible_keys列中索引的位图，并且是冗余的。 ",
+  "wordCount" : "1222",
+  "inLanguage": "en",
+  "datePublished": "2022-11-26T21:26:37+08:00",
+  "dateModified": "2022-11-26T21:26:37+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Me"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://zhougongjin555.github.io/mysql/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ExampleSite",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://zhougongjin555.github.io/%3Clink%20/%20abs%20url%3E"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://zhougongjin555.github.io/" accesskey="h" title="Home (Alt + H)">
+                <img src="https://zhougongjin555.github.io/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">Home</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://zhougongjin555.github.io/archives" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://zhougongjin555.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://zhougongjin555.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://discord.gg/ahpmTvhVmp" title="Discord">
+                    <span>Discord</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com/adityatelange/hugo-PaperMod/wiki/" title="WiKi">
+                    <span>WiKi</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://zhougongjin555.github.io/">Home</a></div>
+    <h1 class="post-title">
+      Mysql
+    </h1>
+    <div class="post-meta"><span title='2022-11-26 21:26:37 +0800 CST'>November 26, 2022</span>&nbsp;·&nbsp;6 min&nbsp;·&nbsp;1222 words&nbsp;·&nbsp;Me&nbsp;|&nbsp;<a href="https://github.com/zhougongjin555/zhougongjin555.github.io/tree/master/content/mysql/index.md" rel="noopener noreferrer" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="索引">索引<a hidden class="anchor" aria-hidden="true" href="#索引">#</a></h1>
+<h2 id="1-索引">1. 索引<a hidden class="anchor" aria-hidden="true" href="#1-索引">#</a></h2>
+<p>在数据库中索引最核心的作用是：<strong>加速查找</strong>。  例如：在含有300w条数据的表中查询，无索引需要700秒，而利用索引可能仅需1秒。</p>
+<pre tabindex="0"><code>mysql&gt; select * from big where password=&#34;81f98021-6927-433a-8f0d-0f5ac274f96e&#34;;
++----+---------+---------------+--------------------------------------+------+
+| id | name    | email         | password                             | age  |
++----+---------+---------------+--------------------------------------+------+
+| 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e |    9 |
++----+---------+---------------+--------------------------------------+------+
+1 row in set (0.70 sec)
+
+mysql&gt; select * from big where id=11;
++----+---------+---------------+--------------------------------------+------+
+| id | name    | email         | password                             | age  |
++----+---------+---------------+--------------------------------------+------+
+| 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e |    9 |
++----+---------+---------------+--------------------------------------+------+
+1 row in set (0.00 sec)
+
+mysql&gt; select * from big where name=&#34;wu-13-1&#34;;
++----+---------+---------------+--------------------------------------+------+
+| id | name    | email         | password                             | age  |
++----+---------+---------------+--------------------------------------+------+
+| 11 | wu-13-1 | w-13-1@qq.com | 81f98021-6927-433a-8f0d-0f5ac274f96e |    9 |
++----+---------+---------------+--------------------------------------+------+
+1 row in set (0.00 sec)
+</code></pre><p>在开发过程中会为哪些 经常会被搜索的列 创建索引，以提高程序的响应速度。例如：查询手机号、邮箱、用户名等。</p>
+<h3 id="11-索引原理">1.1 索引原理<a hidden class="anchor" aria-hidden="true" href="#11-索引原理">#</a></h3>
+<p>为什么加上索引之后速度能有这么大的提升呢？ 因为索引的底层是基于B+Tree的数据结构存储的。</p>
+<p>![image-20210526160040895](assets/image-20210526160040895.png</p>
+<p><img loading="lazy" src="assets/image-20210526155746811.png" alt="image-20210526155746811"  />
+</p>
+<p><img loading="lazy" src="assets/image-20210526160519425.png" alt="image-20210526160519425"  />
+</p>
+<p>很明显，如果有了索引结构的查询效率比表中逐行查询的速度要快很多且数据量越大越明显。</p>
+<p>B+Tree结构连接：https://www.cs.usfca.edu/~galles/visualization/BPlusTree.html</p>
+<p>数据库的索引是基于上述B+Tree的数据结构实现，但在创建数据库表时，如果指定不同的引擎，底层使用的B+Tree结构的原理有些不同。</p>
+<ul>
+<li>
+<p>myisam引擎，非聚簇索引（数据 和 索引结构 分开存储）</p>
+</li>
+<li>
+<p>innodb引擎，聚簇索引（数据 和 主键索引结构存储在一起）</p>
+</li>
+</ul>
+<h4 id="111-非聚簇索引mysiam引擎">1.1.1 非聚簇索引（mysiam引擎）<a hidden class="anchor" aria-hidden="true" href="#111-非聚簇索引mysiam引擎">#</a></h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">age</span><span class="w"> </span><span class="nb">int</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="n">engine</span><span class="o">=</span><span class="n">myisam</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="n">charset</span><span class="o">=</span><span class="n">utf8</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p><img loading="lazy" src="assets/image-20210526160040895.png" alt="image-20210526160040895"  />
+</p>
+<p><img loading="lazy" src="assets/image-20210526155746811.png" alt="image-20210526155746811"  />
+</p>
+<p><img loading="lazy" src="assets/image-20210526155118552.png" alt="image-20210526155118552"  />
+</p>
+<h4 id="112-聚簇索引innodb引擎">1.1.2 聚簇索引（innodb引擎）<a hidden class="anchor" aria-hidden="true" href="#112-聚簇索引innodb引擎">#</a></h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">age</span><span class="w"> </span><span class="nb">int</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="n">engine</span><span class="o">=</span><span class="n">innodb</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="n">charset</span><span class="o">=</span><span class="n">utf8</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>![image-20210526160040895](assets/image-20210526160040895.png</p>
+<p><img loading="lazy" src="assets/image-20210526155746811.png" alt="image-20210526155746811"  />
+</p>
+<p><img loading="lazy" src="assets/image-20210526160519425.png" alt="image-20210526160519425"  />
+</p>
+<p><img loading="lazy" src="assets/image-20210526155250801.png" alt="image-20210526155250801"  />
+</p>
+<p>在MySQL文件存储中的体现：</p>
+<pre tabindex="0"><code>root@192 userdb # pwd
+/usr/local/mysql/data/userdb
+root@192 userdb # ls -l
+total 1412928
+-rw-r-----  1 _mysql  _mysql       8684 May 15 22:51 big.frm，表结构。
+-rw-r-----  1 _mysql  _mysql  717225984 May 15 22:51 big.ibd，数据和索引结构。
+-rw-r-----  1 _mysql  _mysql       8588 May 16 11:38 goods.frm
+-rw-r-----  1 _mysql  _mysql      98304 May 16 11:39 goods.ibd
+-rw-r-----  1 _mysql  _mysql       8586 May 26 10:57 t2.frm，表结构
+-rw-r-----  1 _mysql  _mysql          0 May 26 10:57 t2.MYD，数据
+-rw-r-----  1 _mysql  _mysql       1024 May 26 10:57 t2.MYI，索引结构
+</code></pre><p>上述 聚簇索引 和 非聚簇索引 底层均利用了B+Tree结构结构，只不过内部数据存储有些不同罢了。</p>
+<p>在企业开发中一般都会使用 innodb 引擎（内部支持事务、行级锁、外键等特点），在MySQL5.5版本之后默认引擎也是innodb。</p>
+<ul>
+<li>
+<p>区别</p>
+<pre tabindex="0"><code>innodb支持事务、行锁、外键，安全性较高，
+mysiam插入和查询更快以及删除相较都更快，比如查询会直接查找对应行号，而innodb需要一行一行遍历，删除，mysiam会直接重新建表，而mysiam会一行一行s
+</code></pre></li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="n">mysql</span><span class="o">&gt;</span><span class="w"> </span><span class="k">show</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="err">\</span><span class="k">G</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">***************************</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="w"> </span><span class="k">row</span><span class="w"> </span><span class="o">***************************</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">       </span><span class="k">Table</span><span class="p">:</span><span class="w"> </span><span class="n">users</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">Create</span><span class="w"> </span><span class="k">Table</span><span class="p">:</span><span class="w"> </span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">`</span><span class="n">users</span><span class="o">`</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">id</span><span class="o">`</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">name</span><span class="o">`</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">password</span><span class="o">`</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">ctime</span><span class="o">`</span><span class="w"> </span><span class="n">datetime</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="o">`</span><span class="n">age</span><span class="o">`</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;5&#39;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="o">`</span><span class="n">id</span><span class="o">`</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="o">=</span><span class="mi">11</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="mi">1</span><span class="w"> </span><span class="k">row</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="w"> </span><span class="n">sec</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">ERROR</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">No</span><span class="w"> </span><span class="n">query</span><span class="w"> </span><span class="n">specified</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">mysql</span><span class="o">&gt;</span><span class="w"> </span><span class="k">show</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="err">\</span><span class="k">G</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="o">***************************</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="w"> </span><span class="k">row</span><span class="w"> </span><span class="o">***************************</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">Table</span><span class="p">:</span><span class="w"> </span><span class="n">users</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">   </span><span class="n">Non_unique</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">     </span><span class="n">Key_name</span><span class="p">:</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"> </span><span class="n">Seq_in_index</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="k">Column_name</span><span class="p">:</span><span class="w"> </span><span class="n">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">Collation</span><span class="p">:</span><span class="w"> </span><span class="n">A</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="k">Cardinality</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">     </span><span class="n">Sub_part</span><span class="p">:</span><span class="w"> </span><span class="k">NULL</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">       </span><span class="n">Packed</span><span class="p">:</span><span class="w"> </span><span class="k">NULL</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">         </span><span class="k">Null</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">   </span><span class="n">Index_type</span><span class="p">:</span><span class="w"> </span><span class="n">BTREE</span><span class="w">   </span><span class="c1">-- 虽然显示BTree，但底层数据结构基于B+Tree。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">      </span><span class="k">Comment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">Index_comment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="mi">1</span><span class="w"> </span><span class="k">row</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span><span class="w"> </span><span class="n">sec</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">ERROR</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">No</span><span class="w"> </span><span class="n">query</span><span class="w"> </span><span class="n">specified</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">mysql</span><span class="o">&gt;</span><span class="w">
+</span></span></span></code></pre></div><p>innodb引擎，一般创建的索引：聚簇索引。</p>
+<h3 id="12-常见索引">1.2 常见索引<a hidden class="anchor" aria-hidden="true" href="#12-常见索引">#</a></h3>
+<p>在innodb引擎下，索引底层都是基于B+Tree数据结构存储（聚簇索引）。</p>
+<p>在开发过程中常见的索引类型有：</p>
+<ul>
+<li>主键索引：加速查找、不能为空、不能重复。 + 联合主键索引</li>
+<li>唯一索引：加速查找、不能重复。  + 联合唯一索引  (可以有一个空值)</li>
+<li>普通索引：加速查找。 + 联合索引</li>
+</ul>
+<h4 id="121-主键和联合主键索引">1.2.1 主键和联合主键索引<a hidden class="anchor" aria-hidden="true" href="#121-主键和联合主键索引">#</a></h4>
+<ul>
+<li><code>primary key </code>: 创建主键索引</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w">   </span><span class="c1">-- 主键
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">(</span><span class="err">列</span><span class="mi">1</span><span class="p">,</span><span class="err">列</span><span class="mi">2</span><span class="p">)</span><span class="w">          </span><span class="c1">-- 如果有多列，称为联合主键（不常用且myisam引擎支持）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">alter</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="w"> </span><span class="k">add</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">(</span><span class="err">列名</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">alter</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="w"> </span><span class="k">drop</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>注意：删除索引时可能会报错，**自增列必须定义为键 **。</p>
+<pre tabindex="0"><code>ERROR 1075 (42000): Incorrect table definition; there can be only one auto column and it must be defined as a key
+
+alter table 表 change id id int not null;
+</code></pre><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="n">t7</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">alter</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="n">t6</span><span class="w"> </span><span class="k">drop</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><h4 id="122-唯一和联合唯一索引">1.2.2 唯一和联合唯一索引<a hidden class="anchor" aria-hidden="true" href="#122-唯一和联合唯一索引">#</a></h4>
+<ul>
+<li><code>unique</code>: 唯一索引</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">email</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">unique</span><span class="w"> </span><span class="n">ix_name</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">unique</span><span class="w"> </span><span class="n">ix_email</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">unique</span><span class="w"> </span><span class="p">(</span><span class="err">列</span><span class="mi">1</span><span class="p">,</span><span class="err">列</span><span class="mi">2</span><span class="p">)</span><span class="w">               </span><span class="c1">-- 如果有多列，称为联合唯一索引。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">unique</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="err">索引名</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="err">列名</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">alter</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="w"> </span><span class="k">add</span><span class="w"> </span><span class="n">uniuqe</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="err">索引名</span><span class="p">(</span><span class="err">字段</span><span class="mi">1</span><span class="err">，</span><span class="w"> </span><span class="err">字段</span><span class="mi">2</span><span class="err">，</span><span class="w"> </span><span class="err">字段</span><span class="mi">3</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">alter</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="w"> </span><span class="k">drop</span><span class="w"> </span><span class="k">unique</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="err">索引名</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><h4 id="123-索引和联合索引">1.2.3 索引和联合索引<a hidden class="anchor" aria-hidden="true" href="#123-索引和联合索引">#</a></h4>
+<ul>
+<li><code>index</code> : 普通索引</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">email</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">index</span><span class="w"> </span><span class="n">ix_email</span><span class="w"> </span><span class="p">(</span><span class="n">email</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">index</span><span class="w"> </span><span class="n">ix_name</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">id</span><span class="w"> </span><span class="nb">int</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="w"> </span><span class="n">auto_increment</span><span class="w"> </span><span class="k">primary</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">email</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">null</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">index</span><span class="w"> </span><span class="n">ix_email</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">email</span><span class="p">)</span><span class="w">     </span><span class="c1">-- 如果有多列，称为联合索引。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">create</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="err">索引名</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="err">表名</span><span class="p">(</span><span class="err">列名</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">drop</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="err">索引名</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="err">表名</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><h3 id="13-操作表">1.3 操作表<a hidden class="anchor" aria-hidden="true" href="#13-操作表">#</a></h3>
+<p>在表中创建索引后，查询时一定要命中索引。</p>
+<p><img loading="lazy" src="assets/image-20210526155746811.png" alt="image-20210526155746811"  />
+</p>
+<p>在数据库的表中创建索引之后优缺点如下：</p>
+<ul>
+<li>优点：查找速度快、约束（唯一、主键、联合唯一）</li>
+<li>缺点：插入、删除、更新速度比较慢，因为每次操作都需要调整整个B+Tree的数据结构关系。</li>
+</ul>
+<p>所以，在表中不要无节制的去创建索引啊。。。</p>
+<p>在开发中，我们会对表中经常被搜索的列创建索引，从而提高程序的响应速度。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">`</span><span class="n">big</span><span class="o">`</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="o">`</span><span class="n">id</span><span class="o">`</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="n">AUTO_INCREMENT</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="o">`</span><span class="n">name</span><span class="o">`</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="o">`</span><span class="n">email</span><span class="o">`</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="o">`</span><span class="n">password</span><span class="o">`</span><span class="w"> </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="o">`</span><span class="n">age</span><span class="o">`</span><span class="w"> </span><span class="nb">int</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="o">`</span><span class="n">id</span><span class="o">`</span><span class="p">),</span><span class="w">                       </span><span class="c1">-- 主键索引
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="o">`</span><span class="n">big_unique_email</span><span class="o">`</span><span class="w"> </span><span class="p">(</span><span class="o">`</span><span class="n">email</span><span class="o">`</span><span class="p">),</span><span class="w">  </span><span class="c1">-- 唯一索引
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="k">index</span><span class="w"> </span><span class="o">`</span><span class="n">ix_name_pwd</span><span class="o">`</span><span class="w"> </span><span class="p">(</span><span class="o">`</span><span class="n">name</span><span class="o">`</span><span class="p">,</span><span class="o">`</span><span class="n">password</span><span class="o">`</span><span class="p">)</span><span class="w">     </span><span class="c1">-- 联合索引
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">)</span><span class="w"> </span><span class="n">ENGINE</span><span class="o">=</span><span class="n">InnoDB</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">CHARSET</span><span class="o">=</span><span class="n">utf8</span><span class="w">
+</span></span></span></code></pre></div><p>一般情况下，我们针对只要通过索引列去搜搜都可以 <code>命中</code> 索引（通过索引结构加速查找）。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">email</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&#34;wupeiqi@live.com&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&#34;武沛齐&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&#34;kelly&#34;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">password</span><span class="o">=</span><span class="s2">&#34;ffsijfs&#34;</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">...</span><span class="w">
+</span></span></span></code></pre></div><p>但是，还是会有一些特殊的情况，让我们无法命中索引（即使创建了索引），这也是需要大家在开发中要注意的。</p>
+<ul>
+<li>
+<p>类型不一致</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span><span class="w">		</span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">email</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span><span class="w">	</span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="err">特殊的主键：</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&#34;123&#34;</span><span class="p">;</span><span class="w">	</span><span class="c1">-- 命中
+</span></span></span></code></pre></div></li>
+<li>
+<p>使用不等于</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s2">&#34;武沛齐&#34;</span><span class="p">;</span><span class="w">				</span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">email</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s2">&#34;wupeiqi@live.com&#34;</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="err">特殊的主键：</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">123</span><span class="p">;</span><span class="w">	</span><span class="c1">-- 命中
+</span></span></span></code></pre></div></li>
+<li>
+<p>or，当or条件中有未建立索引的列才失效。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">password</span><span class="o">=</span><span class="s2">&#34;xx&#34;</span><span class="p">;</span><span class="w">			</span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&#34;wupeiqi&#34;</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">password</span><span class="o">=</span><span class="s2">&#34;xx&#34;</span><span class="p">;</span><span class="w">	</span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="err">特别的：</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">password</span><span class="o">=</span><span class="s2">&#34;xx&#34;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">name</span><span class="o">=</span><span class="s2">&#34;xx&#34;</span><span class="p">;</span><span class="w"> </span><span class="c1">-- 命中
+</span></span></span></code></pre></div></li>
+<li>
+<p>排序，当根据索引排序时候，选择的映射如果不是索引，则不走索引。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">asc</span><span class="p">;</span><span class="w">     </span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">desc</span><span class="p">;</span><span class="w">    </span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">select</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">desc</span><span class="p">;</span><span class="w"> </span><span class="c1">-- 命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="err">特别的主键：</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">desc</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 命中
+</span></span></span></code></pre></div></li>
+<li>
+<p>like，模糊匹配时。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">like</span><span class="w"> </span><span class="s2">&#34;%u-12-19999&#34;</span><span class="p">;</span><span class="w">	</span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">like</span><span class="w"> </span><span class="s2">&#34;_u-12-19999&#34;</span><span class="p">;</span><span class="w">	</span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">like</span><span class="w"> </span><span class="s2">&#34;wu-%-10&#34;</span><span class="p">;</span><span class="w">		</span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="err">特别的：</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">like</span><span class="w"> </span><span class="s2">&#34;wu-1111-%&#34;</span><span class="p">;</span><span class="w">	</span><span class="c1">-- 命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">	</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">like</span><span class="w"> </span><span class="s2">&#34;wuw-%&#34;</span><span class="p">;</span><span class="w">		</span><span class="c1">-- 命中, 要求通配符必须在最后面才行
+</span></span></span></code></pre></div></li>
+<li>
+<p>使用函数</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">reverse</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&#34;wupeiqi&#34;</span><span class="p">;</span><span class="w">  </span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="err">特别的：</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverse</span><span class="p">(</span><span class="s2">&#34;wupeiqi&#34;</span><span class="p">);</span><span class="w">  </span><span class="c1">-- 命中
+</span></span></span></code></pre></div></li>
+<li>
+<p>最左前缀，如果是联合索引，要遵循最左前缀原则。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="err">如果联合索引为：</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">password</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">password</span><span class="w">       </span><span class="c1">-- 命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="n">name</span><span class="w">                 	</span><span class="c1">-- 命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="n">password</span><span class="w">                </span><span class="c1">-- 未命中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="n">name</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">password</span><span class="w">       	</span><span class="c1">-- 未命中
+</span></span></span></code></pre></div></li>
+</ul>
+<p>常见的无法命中索引的情况就是上述的示例。</p>
+<p>对于大家来说会现在的最大的问题是，记不住，哪怎么办呢？接下来看执行计划。</p>
+<h3 id="14-执行计划">1.4 执行计划<a hidden class="anchor" aria-hidden="true" href="#14-执行计划">#</a></h3>
+<p>MySQL中提供了执行计划，让你能够预判SQL的执行（只能给到一定的参考，不一定完全能预判准确）。</p>
+<pre tabindex="0"><code>explain + SQL语句;
+</code></pre><p><img loading="lazy" src="assets/image-20210527074105599.png" alt="image-20210527074105599"  />
+</p>
+<p>其中比较重要的是 type，他他SQL性能比较重要的标志，性能从低到高依次：<code>all &lt; index &lt; range &lt; index_merge &lt; ref_or_null &lt; ref &lt; eq_ref &lt; system/const</code></p>
+<ul>
+<li>
+<p>ALL，全表扫描，数据表从头到尾找一遍。(一般未命中索引，都是会执行权标扫描)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="err">特别的：如果有</span><span class="k">limit</span><span class="err">，则找到之后就不在继续向下扫描</span><span class="p">.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">limit</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>INDEX，全索引扫描，对索引从头到尾找一遍</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>RANGE，对索引列进行范围查找</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">33</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">between</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="mi">20</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="s2">&#34;wupeiqi&#34;</span><span class="w"> </span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>INDEX_MERGE，合并索引，使用多个单列索引搜索</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">name</span><span class="o">=</span><span class="s2">&#34;武沛齐&#34;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>REF，根据 索引 直接去查找（非键）。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w">  </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;武沛齐&#39;</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>EQ_REF，连表操作时常见。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="n">big</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="n">users</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">left</span><span class="w"> </span><span class="k">join</span><span class="w"> </span><span class="n">users</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">big</span><span class="p">.</span><span class="n">age</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">users</span><span class="p">.</span><span class="n">id</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>CONST，常量，表最多有一个匹配行,因为仅有一行,在这行的列值可被优化器剩余部分认为是常数,const表很快。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="mi">11</span><span class="p">;</span><span class="w">					</span><span class="c1">-- 主键
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">email</span><span class="o">=</span><span class="s2">&#34;w-11-0@qq.com&#34;</span><span class="p">;</span><span class="w">	</span><span class="c1">-- 唯一索引
+</span></span></span></code></pre></div></li>
+<li>
+<p>SYSTEM，系统，表仅有一行(=系统表)。这是const联接类型的一个特例。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="w"> </span><span class="k">explain</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="p">(</span><span class="k">select</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">big</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="mi">1</span><span class="w"> </span><span class="k">limit</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">A</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div></li>
+</ul>
+<p>其他列：</p>
+<pre tabindex="0"><code>id，查询顺序标识
+
+z，查询类型
+    SIMPLE          简单查询
+    PRIMARY         最外层查询
+    SUBQUERY        映射为子查询
+    DERIVED         子查询
+    UNION           联合
+    UNION RESULT    使用联合的结果
+    ...
+    
+table，正在访问的表名
+
+partitions，涉及的分区（MySQL支持将数据划分到不同的idb文件中，详单与数据的拆分）。 一个特别大的文件拆分成多个小文件（分区）。
+
+possible_keys，查询涉及到的字段上若存在索引，则该索引将被列出，即：可能使用的索引。
+key，显示MySQL在查询中实际使用的索引，若没有使用索引，显示为NULL。例如：有索引但未命中，则possible_keys显示、key则显示NULL。
+
+key_len，表示索引字段的最大可能长度。(类型字节长度 + 变长2 + 可空1)，例如：key_len=195，类型varchar(64)，195=64*3+2+1
+
+ref，连表时显示的关联信息。例如：A和B连表，显示连表的字段信息。
+
+rows，估计读取的数据行数（只是预估值）
+	explain select * from big where password =&#34;025dfdeb-d803-425d-9834-445758885d1c&#34;;
+	explain select * from big where password =&#34;025dfdeb-d803-425d-9834-445758885d1c&#34; limit 1;
+filtered，返回结果的行占需要读到的行的百分比。
+	explain select * from big where id=1;  -- 100，只读了一个1行，返回结果也是1行。
+	explain select * from big where password=&#34;27d8ba90-edd0-4a2f-9aaf-99c9d607c3b3&#34;;  -- 10，读取了10行，返回了1行。
+	注意：密码27d8ba90-edd0-4a2f-9aaf-99c9d607c3b3在第10行
+	
+extra，该列包含MySQL解决查询的详细信息。
+    “Using index”
+    此值表示mysql将使用覆盖索引，以避免访问表。不要把覆盖索引和index访问类型弄混了。
+    “Using where”
+    这意味着mysql服务器将在存储引擎检索行后再进行过滤，许多where条件里涉及索引中的列，当（并且如果）它读取索引时，就能被存储引擎检验，因此不是所有带where子句的查询都会显示“Using where”。有时“Using where”的出现就是一个暗示：查询可受益于不同的索引。
+    “Using temporary”
+    这意味着mysql在对查询结果排序时会使用一个临时表。
+    “Using filesort”
+    这意味着mysql会对结果使用一个外部索引排序，而不是按索引次序从表里读取行。mysql有两种文件排序算法，这两种排序方式都可以在内存或者磁盘上完成，explain不会告诉你mysql将使用哪一种文件排序，也不会告诉你排序会在内存里还是磁盘上完成。
+    “Range checked for each record(index map: N)”
+    这个意味着没有好用的索引，新的索引将在联接的每一行上重新估算，N是显示在possible_keys列中索引的位图，并且是冗余的。
+</code></pre>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+
+<div class="share-buttons">
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Mysql on twitter"
+        href="https://twitter.com/intent/tweet/?text=Mysql&amp;url=https%3a%2f%2fzhougongjin555.github.io%2fmysql%2f&amp;hashtags=">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-253.927,424.544c135.939,0 210.268,-112.643 210.268,-210.268c0,-3.218 0,-6.437 -0.153,-9.502c14.406,-10.421 26.973,-23.448 36.935,-38.314c-13.18,5.824 -27.433,9.809 -42.452,11.648c15.326,-9.196 26.973,-23.602 32.49,-40.92c-14.252,8.429 -30.038,14.56 -46.896,17.931c-13.487,-14.406 -32.644,-23.295 -53.946,-23.295c-40.767,0 -73.87,33.104 -73.87,73.87c0,5.824 0.613,11.494 1.992,16.858c-61.456,-3.065 -115.862,-32.49 -152.337,-77.241c-6.284,10.881 -9.962,23.601 -9.962,37.088c0,25.594 13.027,48.276 32.95,61.456c-12.107,-0.307 -23.448,-3.678 -33.41,-9.196l0,0.92c0,35.862 25.441,65.594 59.311,72.49c-6.13,1.686 -12.72,2.606 -19.464,2.606c-4.751,0 -9.348,-0.46 -13.946,-1.38c9.349,29.426 36.628,50.728 68.965,51.341c-25.287,19.771 -57.164,31.571 -91.8,31.571c-5.977,0 -11.801,-0.306 -17.625,-1.073c32.337,21.15 71.264,33.41 112.95,33.41Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Mysql on linkedin"
+        href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fzhougongjin555.github.io%2fmysql%2f&amp;title=Mysql&amp;summary=Mysql&amp;source=https%3a%2f%2fzhougongjin555.github.io%2fmysql%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Mysql on reddit"
+        href="https://reddit.com/submit?url=https%3a%2f%2fzhougongjin555.github.io%2fmysql%2f&title=Mysql">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Mysql on facebook"
+        href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fzhougongjin555.github.io%2fmysql%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Mysql on whatsapp"
+        href="https://api.whatsapp.com/send?text=Mysql%20-%20https%3a%2f%2fzhougongjin555.github.io%2fmysql%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Mysql on telegram"
+        href="https://telegram.me/share/url?text=Mysql&amp;url=https%3a%2f%2fzhougongjin555.github.io%2fmysql%2f">
+        <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+        </svg>
+    </a>
+</div>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2022 <a href="https://zhougongjin555.github.io/">ExampleSite</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
