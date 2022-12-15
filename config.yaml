@@ -45,7 +45,7 @@ params:
   title: ExampleSite
   description: "uneBlog welcomes you"
   keywords: [Blog, Portfolio, PaperMod]
-  author: Me
+  author: ["Jin", "other"]
   # author: ["Me", "You"] # multiple authors
   images: ["papermod-cover.png"]
   DateFormat: "January 2, 2006"

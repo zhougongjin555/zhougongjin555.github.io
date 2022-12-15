@@ -1,7 +1,7 @@
 ---
-title: "Mysql"
-date: 2022-11-26T21:26:37+08:00
-draft: false
+title: "Mysql_index"
+date: 2022-12-15T14:47:28+08:00
+draft: true
 ---
 
 # 索引
@@ -48,9 +48,9 @@ mysql> select * from big where name="wu-13-1";
 
 ![image-20210526160040895](assets/image-20210526160040895.png
 
-![image-20210526155746811](assets/image-20210526155746811.png)
+![image-20210526155746811](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526155746811.png)
 
-![image-20210526160519425](assets/image-20210526160519425.png)
+![image-20210526160519425](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526160519425.png)
 
 很明显，如果有了索引结构的查询效率比表中逐行查询的速度要快很多且数据量越大越明显。
 
@@ -78,11 +78,11 @@ create table 表名(
 ```
 
 
-![image-20210526160040895](assets/image-20210526160040895.png)
+![image-20210526160040895](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526160040895.png)
 
-![image-20210526155746811](assets/image-20210526155746811.png)
+![image-20210526155746811](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526155746811.png)
 
-![image-20210526155118552](assets/image-20210526155118552.png)
+![image-20210526155118552](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526155118552.png)
 
 
 
@@ -99,11 +99,11 @@ create table 表名(
 
 ![image-20210526160040895](assets/image-20210526160040895.png
 
-![image-20210526155746811](assets/image-20210526155746811.png)
+![image-20210526155746811](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526155746811.png)
 
-![image-20210526160519425](assets/image-20210526160519425.png)
+![image-20210526160519425](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526160519425.png)
 
-![image-20210526155250801](assets/image-20210526155250801.png)
+![image-20210526155250801](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526155250801.png)
 
 在MySQL文件存储中的体现：
 
@@ -316,7 +316,7 @@ drop index 索引名 on 表名;
 
 
 
-![image-20210526155746811](assets/image-20210526155746811.png)
+![image-20210526155746811](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210526155746811.png)
 
 在数据库的表中创建索引之后优缺点如下：
 
@@ -446,7 +446,7 @@ MySQL中提供了执行计划，让你能够预判SQL的执行（只能给到一
 explain + SQL语句;
 ```
 
-![image-20210527074105599](assets/image-20210527074105599.png)
+![image-20210527074105599](/Users/edy/GoProjects/zhougongjin555.github.io/content/posts/assets/image-20210527074105599.png)
 
 其中比较重要的是 type，他他SQL性能比较重要的标志，性能从低到高依次：`all < index < range < index_merge < ref_or_null < ref < eq_ref < system/const` 
 
